@@ -1,0 +1,117 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  height: 60px;
+  border-bottom: 1px solid #ddd;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  .left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    span {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+    }
+    .search {
+      display: flex;
+      align-items: center;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      padding: 5px 10px;
+      background-color: #f9f9f9;
+      input {
+        border: none;
+        background-color: transparent;
+        padding: 5px;
+        font-size: 14px;
+        color: #333;
+        &::placeholder {
+          color: #999;
+        }
+        &:focus {
+          outline: none;
+        }
+      }
+    }
+  }
+  .center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    position: relative;
+    svg {
+      width: 120px;
+      font-size: 24px;
+      color: #333;
+      &:hover {
+        color: #007bff;
+        cursor: pointer;
+      }
+    }
+  }
+  .right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    .user-icons {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: #999;
+      border-radius: 50%;
+      svg {
+        font-size: 24px;
+        color: #333;
+        &:hover {
+          color: #007bff;
+          cursor: pointer;
+        }
+      }
+    }
+    .user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+      span {
+        font-size: 16px;
+        font-weight: 500;
+        color: #333;
+      }
+      .menu {
+        position: absolute;
+        top: 70px;
+        right: 70px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 10px;
+        a {
+          display: block;
+          padding: 10px;
+          color: #333;
+          text-decoration: none;
+          &:hover {
+            background: #f1f1f1;
+          }
+        }
+      }
+    }
+  }
+}

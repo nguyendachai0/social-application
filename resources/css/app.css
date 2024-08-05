@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* src/styles/App.css */
+/* styles.css or a similar CSS file */
+.left-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 80px; /* Adjust width as needed */
+    overflow-y: auto;
+}
+
