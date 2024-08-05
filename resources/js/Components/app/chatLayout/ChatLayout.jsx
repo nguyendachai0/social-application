@@ -7,6 +7,7 @@ const ChatLayout = () => {
     const page  =  usePage();
     const conversations = page.props.conversations;
     const selectedConversation = page.props.selectedConversation;
+    console.log('Conversations: ', conversations);
     console.log(selectedConversation);
     
     const [localConversations, setLocalConversations] = useState([]);
@@ -15,6 +16,7 @@ const ChatLayout = () => {
     // const {on}  = useEventBus();
     const isUserOnline = (userId) => onlineUsers[userId];
     
+    console.log(localConversations)
     const onSearch = (ev) => {
         const search = ev.target.value.toLowerCase();
         setLocalConversations(conversations.filter((conversation) => {
