@@ -2,9 +2,13 @@ const UserAvatar = ({ user, online = null, profile = false }) => {
     const onlineClass = online === true ? "online" : online === false ? "offline" : "";
     const sizeClass = profile ? "w-40" : "w-8";
 
+    if (!user) {
+        return <div>No user data</div>; // Placeholder or default UI
+      }
     return (
         <>
-            {user.avatar_url ? (
+
+            {user.avatar ? (
                 <div className={`chat-image avatar ${onlineClass}`}>
                     <div className={`rounded-full ${sizeClass}`}>
                         <img src={user.avatar_url} alt={`${user.name}'s avatar`} />

@@ -7,11 +7,9 @@ const RightBar = () => {
     const [onlineUsers, setOnlineUsers] = useState([]);
     const isUserOnline = (userId) => !!onlineUsers[userId];
     const  friends = page.props.friends;
-    console.log('friends:',friends);
 
     const getOnlineFriends = () => {
         const onlineUserIds = Object.keys(onlineUsers);
-        console.log(onlineUserIds);
         return friends.filter(friend => 
             onlineUserIds.includes(friend.id.toString())
         );
@@ -53,13 +51,9 @@ const RightBar = () => {
     }, []);
 
     useEffect(() =>  {
-        console.log('Online users', onlineUsers);
     }, [onlineUsers])
 
     const onlineFriends  = getOnlineFriends();
-    
-    console.log('Online Friends:', onlineFriends);
-
     return ( 
         <div className="rightBar">
             <div className="container">
