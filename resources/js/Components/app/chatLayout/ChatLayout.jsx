@@ -5,8 +5,11 @@ import GroupAvatar from '../GroupAvatar'; // Ensure this import is correct
 import MessageInput from '../messages/MessageInput';
 import './chatLayout.scss';
 import { useEventBus } from '@/EventBus';
+import MessageAttachments from '../messages/MessageAttachments';
+import AttachmentPreviewModal from '../messages/AttachmentPreviewModal';
 
-const ChatLayout = ({ conversation, newMessage = null, onClose }) => {
+
+const ChatLayout = ({ conversation, newMessage = null, onClose = () => {} }) => {
   const page = usePage();
   const currentUser = page.props.auth.user;
   const [selectedConversation, setSelectedConversation] = useState(null);
@@ -14,6 +17,18 @@ const ChatLayout = ({ conversation, newMessage = null, onClose }) => {
   const [scrollFromBottom, setScrollFromBottom] = useState(0);
   const {emit, on} = useEventBus();
   const messagesCtrRef = useRef(null);
+  const [previewAttachment, setPreviewAttachment] = useState({});
+  const [showAttachmentPreview, setShowAttachemntPreview] = useState(false);
+
+
+  const onAttachmentClick = (attachments, ind) => {
+    setPreviewAttachment({
+        attachments,
+        ind,
+    });
+    setShowAttachemntPreview(true);
+}
+
   useEffect(() => {
     const fetchMessages = async () => {
       if (conversation) {
@@ -46,7 +61,6 @@ const ChatLayout = ({ conversation, newMessage = null, onClose }) => {
     {
       setLocalMessages((prevMessages) => {
         const updatedMessages = [...prevMessages, message];
-        console.log("updatedMessages", updatedMessages);
         return updatedMessages;
       });
     }
@@ -112,13 +126,27 @@ const ChatLayout = ({ conversation, newMessage = null, onClose }) => {
         {localMessages.map((message, index) => (
           <div key={index} className={`chat ${message.sender_id === currentUser.id ? 'chat-end' : 'chat-start'}`}>
             <UserAvatar user={message.sender} />
-            <div className={"chat-bubble chat-bubble-" + (message.sender_id === currentUser.id ? "info" : "secondary")}>{message.message}</div>
+            <div className={"chat-bubble chat-bubble-" + (message.sender_id === currentUser.id ? "info" : "secondary")}>{message.message}
+
+            <MessageAttachments
+                    attachments={message.attachments}
+                    attachmentClick={onAttachmentClick}/>
+            </div>
             <div className="chat-footer opacity-50">Delivered</div>
           </div>
         ))}
       </div>
       <MessageInput conversation={selectedConversation} />
+      {previewAttachment.attachments && (
+            <AttachmentPreviewModal
+            attachments={previewAttachment.attachments}
+            index={previewAttachment.ind}
+            show={showAttachmentPreview}
+            onClose={() => setShowAttachemntPreview(false)}
+            />
+          )}
     </div>
+    
   );
 };
 
