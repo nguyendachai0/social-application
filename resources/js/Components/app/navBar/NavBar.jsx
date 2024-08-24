@@ -6,36 +6,65 @@ import { usePage } from "@inertiajs/react";
 import { formatMessageDateShort } from "@/helpers";
 import ChatLayout from "../chatLayout/ChatLayout";
 import { useEventBus } from "@/EventBus";
+import UserAvatar from "../UserAvatar";
+import GroupAvatar from "../GroupAvatar";
+import Dropdown from '@/Components/Dropdown';
     const Navbar = () => {
-        const [isMenuVisible, setIsMenuVisible] = useState(false);
         const [isChatVisible, setIsChatVisible] = useState(false);
-        const [selectedConversation, setSelectedConversation] = useState(null);
+        const [selectedConversation, setSelectedConversation] = useState([]);
         const page  =  usePage();
         const user = page.props.auth.user;
         const conversations = page.props.conversations;
         const [localConversations, setLocalConversations] = useState([]);
         const [localMessages, setLocalMessages]  = useState([]);
-
+        const conversationMenu = document.getElementById("conversationMenu");
+        const [hiddenConversations, setHiddenConversations] = useState({});
         
         const {emit, on} = useEventBus();
-
-        const handleConversationClick = (conversation) => {
-          setSelectedConversation(conversation);
-          setIsChatVisible(true);
-        };
-
+       
+        const handleConversationClick = (newConversation) => {
+            setSelectedConversation((prevSelected) => { 
+                const isExisting = prevSelected.some(conv => conv.id === newConversation.id);
+                if (isExisting) {
+                    return prevSelected;
+                }        
+                const updated = [...prevSelected, newConversation];
+                setIsChatVisible(true);
+                conversationMenu.removeAttribute("open");
+                return updated;
+              });
+          
+        }
         const messageCreated = (message) => {
-          if(selectedConversation && selectedConversation.is_group && selectedConversation.id  === message.group_id){
-              setLocalMessages((prevMessages) => [...prevMessages, message])
-          }
-  
-          if(selectedConversation && selectedConversation.is_user && (selectedConversation.id === message.sender_id ||  selectedConversation.id == message.receiver_id))
-          {
-              setLocalMessages((prevMessages) => [...prevMessages, message]);
-          }
-  
-      }
-                
+            console.log('message', message)
+            setLocalConversations((oldUsers) => {
+                return oldUsers.map((u) => {
+                    if(
+                        message.receiver_id &&
+                        !u.is_group &&
+                        (u.id ==  message.sender_id || u.id == message.receiver_id)){
+                            u.last_message = message.message;
+                            u.last_message_date = message.created_at;
+                            return u;
+                        }
+
+                    if(message.group_id && 
+                        u.is_group &&
+                        u.id ==  message.group_id
+                    ){
+                        u.last_message = message.message;
+                        u.last_message_date = message.created_at;
+                        return u;
+                    }
+                    return u;
+                        
+                })
+
+            })
+        }
+
+        
+        
         const [sortedConversations, setSortedConversations] = useState([]);
         const onSearch = (ev) => {
             const search = ev.target.value.toLowerCase();
@@ -44,13 +73,19 @@ import { useEventBus } from "@/EventBus";
             })
         );
         };
-        const handleMessageIconClick = () => {
-            setIsChatVisible(prev => !prev);
+       const handleChatClose = (conversationId) => {
+        setSelectedConversation((prevSelected) => {
+                const updated = prevSelected.filter(conv => conv.id!== conversationId);
+                return updated;
+            });
         };
-        const handleUserIconClick = () => {
-            setIsMenuVisible(prev => !prev);
-        };
-    
+       
+        const  handleChatHide = (conversationId) => {
+            setHiddenConversations((prev) => ({
+                ...prev,
+                [conversationId]: !prev[conversationId],
+            }))
+        }
         
         useEffect(() => {
             setSortedConversations(
@@ -81,9 +116,12 @@ import { useEventBus } from "@/EventBus";
             setLocalConversations(conversations);
         }, [conversations]);
 
+        useEffect(() => {
+        }, [sortedConversations])
+
         
        useEffect(() => {
-        conversations.forEach((conversation) => {
+        selectedConversation.forEach((conversation) => {
             let  channel = `message.group.${conversation.id}`;
 
             if(conversation.is_user){
@@ -100,7 +138,6 @@ import { useEventBus } from "@/EventBus";
                 console.log(error);
             })
             .listen("SocketMessage" ,  (e) =>  {
-                console.log("SocketMessage", e);
                 const message = e.message;
                 emit("message.created",  message);
                 if(message.sender_id  === user.id)
@@ -111,7 +148,7 @@ import { useEventBus } from "@/EventBus";
                     user: message.sender,
                     group_id: message.group_id,
                     message:
-                    message.messgae || 
+                    message.message || 
                     `Shared ${
                         message.attachments.length ===  1
                         ? "an attachemnt"
@@ -121,8 +158,9 @@ import { useEventBus } from "@/EventBus";
                 });
             })
         })
+       
         return () => {
-            conversations.forEach((conversation) => {
+            selectedConversation.forEach((conversation) => {
                 let channel  = `message.group.${conversation.id}`;
 
                 if(conversation.is_user){
@@ -135,14 +173,21 @@ import { useEventBus } from "@/EventBus";
             })
         };
 
-    }, [conversations])
+    }, [selectedConversation])
         
         useEffect(() => {
+            console.log(localMessages)
+        }, [localMessages])
+
+    
+    
+
+        useEffect(() => {
           const offCreated = on('message.created', messageCreated);
-          
           return () => {
               offCreated();
           }
+
       }, [selectedConversation])  
 
         
@@ -186,9 +231,9 @@ import { useEventBus } from "@/EventBus";
         <li>
 
 
-                            <details className="dropdown dropdown-end" >
-   <summary className="">                   
-                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                            <details className="dropdown dropdown-end" id="conversationMenu">
+   <summary>                   
+                   <svg  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
   <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
 </svg>
                     </summary>
@@ -200,7 +245,7 @@ import { useEventBus } from "@/EventBus";
                     <PencilSquareIcon className="w-4 h-4 inline-block ml-2"/>
                 </button>
             </div>
-        </div>
+    </div>
         <div className="p-3">
             <TextInput onKeyUp={onSearch} placeholder="Filter users and groups" className="w-full"/>
         </div>
@@ -242,6 +287,7 @@ import { useEventBus } from "@/EventBus";
             ))}
             </div>
   </ul>
+                    
 </details>
 </li>
         <li><a>
@@ -249,40 +295,84 @@ import { useEventBus } from "@/EventBus";
   <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
 </svg>
 </a></li>
-    <div className="dropdown dropdown-end">
-      <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-        <div className="w-10 rounded-full">
-          <img
-            alt="Tailwind CSS Navbar component"
-            src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
-        </div>
-      </div>
-      <ul
-        tabIndex={0}
-        className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
-        <li>
-          <a className="justify-between">
-            Profile
-            <span className="badge">New</span>
-          </a>
-        </li>
-        <li><a>Settings</a></li>
-        <li><a>Logout</a></li>
-      </ul>
-    </div>
+<div className="hidden sm:flex sm:items-center sm:ms-6">
+                            <div className="ms-3 relative">
+                                <Dropdown>
+                                    <Dropdown.Trigger>
+                                        <span className="inline-flex rounded-md">
+                                            <button
+                                                type="button"
+                                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150"
+                                            >
+                                                {user.first_name + ' ' + user.last_name}
+
+                                                <svg
+                                                    className="ms-2 -me-0.5 h-4 w-4"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 20 20"
+                                                    fill="currentColor"
+                                                >
+                                                    <path
+                                                        fillRule="evenodd"
+                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                        clipRule="evenodd"
+                                                    />
+                                                </svg>
+                                            </button>
+                                        </span>
+                                    </Dropdown.Trigger>
+
+                                    <Dropdown.Content>
+                                        <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
+                                        <Dropdown.Link href={route('logout')} method="post" as="button">
+                                            Log Out
+                                        </Dropdown.Link>
+                                    </Dropdown.Content>
+                                </Dropdown>
+                            </div>
+                        </div>
+
     </ul>
   </div>
   {
   isChatVisible && selectedConversation && (
-      <ChatLayout
-          conversation={selectedConversation}
-          onClose={() => setIsChatVisible(false)}
-      />
-  )}
+    <>
+        <div className="flex w-300 h-98 fixed bottom-0 right-12">
+       { selectedConversation.map((conversation) => {
+        const isHidden = hiddenConversations[conversation.id];
+            return !isHidden && (
+                <ChatLayout
+                key={conversation.id}
+                conversation={conversation}
+                isHidden={isHidden}
+                onClose={() => handleChatClose(conversation.id)}
+                onHide={() => handleChatHide(conversation.id)}
+                />
+            );
+        })};
+        </div>
+
+        <div className="fixed bottom-0 right-2 flex flex-col items end">
+            {selectedConversation.map((conversation) => {
+                const isHidden =  hiddenConversations[conversation.id];
+                return isHidden && (
+                    <div 
+                    key={conversation.id}
+                    className="mb-2 cursor-pointer"
+                    onClick={() => handleChatHide(conversation.id)}>
+                {conversation.is_user  && <UserAvatar user={conversation} profile={true} className="mr-2"/>}
+                {conversation.is_group  && <GroupAvatar group={conversation} size={40} className="mr-2"/>}
+                </div>
+                )
+            })}
+        </div>
+        </>
+      )}
 </div>
 
-    );
-  }
 
+    );
+  
+    }
 
 export default Navbar;

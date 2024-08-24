@@ -1,3 +1,7 @@
 .details::after {
   display: none !important; 
 }
+
+summary::after {
+  display: none;
+}
