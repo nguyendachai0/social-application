@@ -20,7 +20,6 @@ const ChatLayout = ({ conversation, newMessage = null, onClose = () => {}, onHid
   const [previewAttachment, setPreviewAttachment] = useState({});
   const [showAttachmentPreview, setShowAttachmentPreview] = useState(false);
 
-
   const onAttachmentClick = (attachments, ind) => {
     setPreviewAttachment({
         attachments,
@@ -32,7 +31,7 @@ const ChatLayout = ({ conversation, newMessage = null, onClose = () => {}, onHid
   useEffect(() => {
     const fetchMessages = async () => {
       if (conversation) {
-        const type = conversation.group_id ? 'group' : 'user';
+        const type = conversation.is_group ? 'group' : 'user';
         try {
           const response = await fetch(`/${type}/${conversation.id}`);
           const data = await response.json();
@@ -53,8 +52,14 @@ const ChatLayout = ({ conversation, newMessage = null, onClose = () => {}, onHid
 
   const messageCreated = (message) => {
     console.log("message in Chat", message);
+    console.log(selectedConversation);
     if(selectedConversation && selectedConversation.is_group && selectedConversation.id  === message.group_id){
-        setLocalMessages((prevMessages) => [...prevMessages, message])
+        setLocalMessages((prevMessages) =>
+        {
+          const updatedMessages = [...prevMessages, message];
+          console.log(updatedMessages)
+          return updatedMessages;
+        });
     }
 
     if(selectedConversation && selectedConversation.is_user && (selectedConversation.id === message.sender_id ||  selectedConversation.id == message.receiver_id))

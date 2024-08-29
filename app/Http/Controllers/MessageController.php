@@ -32,14 +32,13 @@ class MessageController extends Controller
     public function byGroup(Group $group)
     {
         $messages =  Message::where('group_id',  $group->id)
-            ->latest()
-            ->paginate(10);
+            ->get();
 
-        return inertia('Home', [
+        return [
             'selectedConversation' => $group->toConversationArray(),
             'messages' => MessageResource::collection($messages),
 
-        ]);
+        ];
     }
 
     public function loadOlder(Message $message)

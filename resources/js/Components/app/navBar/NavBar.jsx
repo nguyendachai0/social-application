@@ -118,67 +118,6 @@ import Dropdown from '@/Components/Dropdown';
 
         useEffect(() => {
         }, [sortedConversations])
-
-        
-    //    useEffect(() => {
-    //     selectedConversation.forEach((conversation) => {
-    //         let  channel = `message.group.${conversation.id}`;
-
-    //         if(conversation.is_user){
-    //             channel = `message.user.${[
-    //                 parseInt(user.id),
-    //                 parseInt(conversation.id),
-    //             ]
-    //             .sort((a,b) => a - b)
-    //             .join("-")}`;
-    //         }
-
-    //         Echo.private(channel)
-    //         .error((error) => {
-    //             console.log(error);
-    //         })
-    //         .listen("SocketMessage" ,  (e) =>  {
-    //             const message = e.message;
-    //             emit("message.created",  message);
-    //             if(message.sender_id  === user.id)
-    //             {
-    //                 return;
-    //             }
-    //             emit("newMessageNotifiation", {
-    //                 user: message.sender,
-    //                 group_id: message.group_id,
-    //                 message:
-    //                 message.message || 
-    //                 `Shared ${
-    //                     message.attachments.length ===  1
-    //                     ? "an attachemnt"
-    //                     :  message.attachemnts.length +
-    //                     " attachemnts"
-    //                 }`,
-    //             });
-    //         })
-    //     })
-       
-    //     return () => {
-    //         selectedConversation.forEach((conversation) => {
-    //             let channel  = `message.group.${conversation.id}`;
-
-    //             if(conversation.is_user){
-    //                 channel = `message.user.${[parseInt(user.id),  parseInt(conversation.id), ]
-    //                     .sort((a,b) => a - b)
-    //                     .join("-")
-    //                 }`;
-    //             }
-    //             Echo.leave(channel);
-    //         })
-    //     };
-
-    // }, [selectedConversation])
-        
-        useEffect(() => {
-            console.log(localMessages)
-        }, [localMessages])
-
     
     
 
@@ -189,35 +128,6 @@ import Dropdown from '@/Components/Dropdown';
           }
 
       }, [selectedConversation])  
-
-
-    //   useEffect(() => {
-    //     Echo.private(`user-connected.${user.id}`)
-    //         .error((error) => {
-    //             console.error('Error subscribing to user-connected channel:', error);
-    //         })
-    //         .listen('UserConnected', (event) => {
-    //             const channel = event.channelName;
-    //             console.log('channel', channel);
-    //             console.log('channel');
-    //             // Automatically subscribe to the newly connected channel
-    //             Echo.private(channel)
-    //                 .error((error) => {
-    //                     console.error('Error subscribing to channel:', error);
-    //                 })
-    //                 .listen('SocketMessage', (e) => {
-    //                     const message = e.message;
-    //                     emit('message.created', message);
-    //                     if (message.sender_id !== user.id) {
-    //                         emit('newMessageNotification', {
-    //                             user: message.sender,
-    //                             group_id: message.group_id,
-    //                             message: message.message || `Shared ${message.attachments.length} attachments`,
-    //                         });
-    //                     }
-    //                 });
-    //         });
-    // }, []);
     
     const subscribedChannels = useRef(new Set());
 
@@ -233,7 +143,6 @@ import Dropdown from '@/Components/Dropdown';
                     .join("-")}`;
             }
     
-            // Subscribe only if not already subscribed
             if (!subscribedChannels.current.has(channel)) {
                 subscribedChannels.current.add(channel);
     
@@ -293,10 +202,26 @@ import Dropdown from '@/Components/Dropdown';
                         });
                 }
             });
+       
     }, [selectedConversation, user.id]);
     
-
-        
+    useEffect(() => {
+        const friendRequestChannel = `friend-request.user.${user.id}`;
+    
+        Echo.private(friendRequestChannel)
+            .error((error) => {
+                console.error(`Error subscribing to ${friendRequestChannel}:`, error);
+            })
+            .listen("FriendRequestSent", (event) => {
+                const senderId = event.senderId;
+                console.log(`New friend request from user ID: ${senderId}`);
+                emit("friendRequestReceived", { senderId });
+            });
+    
+        return () => {
+            Echo.leave(friendRequestChannel);
+        };
+    }, [user.id]);
       
     return (
 <div className="navbar bg-base-100">
@@ -371,7 +296,7 @@ import Dropdown from '@/Components/Dropdown';
                   </div>
                   <div className="flex flex-col gap-1 justify-between items-start">
                     <h3 className="text-sm font-semibold">
-                        {conversation.first_name}
+                        {conversation.is_user ? conversation.first_name : conversation.name}
                     </h3>
                     <div className="flex gap-1">
                     {conversation.last_message &&  (

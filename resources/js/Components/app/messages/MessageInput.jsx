@@ -58,7 +58,6 @@ const MessageInput =  ({ conversation = null }) => {
             formData.append("attachments[]",  file.file);
         })
         formData.append("message",  newMessage);
-        console.log("Con",conversation);
         if(conversation.is_user){
             formData.append("receiver_id", conversation.id);
         }else if (conversation.is_group){
