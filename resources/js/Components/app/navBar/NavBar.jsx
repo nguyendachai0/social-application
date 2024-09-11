@@ -2,13 +2,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import "./navBar.scss";
 import { PencilSquareIcon } from "@heroicons/react/24/solid";
 import TextInput from "@/Components/TextInput";
-import { usePage } from "@inertiajs/react";
+import { Link, usePage } from "@inertiajs/react";
 import { formatMessageDateShort } from "@/helpers";
 import ChatLayout from "../chatLayout/ChatLayout";
 import { useEventBus } from "@/EventBus";
 import UserAvatar from "../UserAvatar";
 import GroupAvatar from "../GroupAvatar";
 import Dropdown from '@/Components/Dropdown';
+
     const Navbar = () => {
         const [isChatVisible, setIsChatVisible] = useState(false);
         const [selectedConversation, setSelectedConversation] = useState([]);
@@ -226,8 +227,12 @@ import Dropdown from '@/Components/Dropdown';
     return (
 <div className="navbar bg-base-100">
   <div className="flex-1">
-    <a className="btn btn-ghost text-xl">FootNote</a>
-    <div className="form-control">
+  <div>
+            <Link href={route('dashboard')} className="btn btn-ghost text-xl">
+                FootNote
+            </Link>
+        </div>
+            <div className="form-control">
       <input type="text" placeholder="Search" className="input input-bordered w-24 md:w-auto" />
     </div>
   </div>

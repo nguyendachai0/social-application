@@ -20,6 +20,7 @@ class AttachmentResource extends JsonResource
             'id'  => $this->id,
             'message_id' => $this->message_id,
             'comment_id' => $this->comment_id,
+            'post_id' => $this->post_id,
             'name'  => $this->name,
             'mime' => $this->mime,
             'size' => $this->size,

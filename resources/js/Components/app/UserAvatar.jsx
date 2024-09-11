@@ -5,13 +5,14 @@ const UserAvatar = ({ user, online = null, profile = false }) => {
     if (!user) {
         return <div>No user data</div>; // Placeholder or default UI
       }
+      console.log(user)
     return (
         <>
 
             {user.avatar ? (
                 <div className={`chat-image avatar ${onlineClass}`}>
                     <div className={`rounded-full ${sizeClass}`}>
-                        <img src={user.avatar_url} alt={`${user.name}'s avatar`} />
+                        <img src={`/storage/avatars/${user.avatar}`}  alt={`${user.name}'s avatar`} />
                     </div>
                 </div>
             ) : (

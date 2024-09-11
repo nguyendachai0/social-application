@@ -1,15 +1,18 @@
+import UserAvatar from "../UserAvatar";
 import "./leftBar.scss";
-const LeftBar = () => {
+import { Link } from "@inertiajs/react";
+
+const LeftBar = ({user}) => {
+  
   return (
     <div className="leftBar">
       <div className="container">
         <div className="menu">
           <div className="user">
-            <img
-              src="https://scontent.fdad1-3.fna.fbcdn.net/v/t39.30808-1/358439054_816747766761639_650919250803168650_n.jpg?stp=cp0_dst-jpg_p74x74&_nc_cat=111&ccb=1-7&_nc_sid=0ecb9b&_nc_ohc=_M4CETGy7qsQ7kNvgHSPacO&_nc_ht=scontent.fdad1-3.fna&oh=00_AYBUiitiOJafL3J1lDfZcqtZ4he6TFWC5eeeNjTMgakQgA&oe=66B2AC2B"
-              alt=""
-            />
-            <span> Nam </span>{" "}
+              <Link className="flex items-center space-x-2" href={route('user.profile', user.email)}>
+          <UserAvatar user={user}  />
+            <span> {user.first_name}  {user.last_name} </span>{" "}
+            </Link>
           </div>{" "}
           <div className="item">
             <img
