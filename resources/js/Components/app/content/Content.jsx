@@ -1,8 +1,15 @@
 import React from "react";
 import "./home.scss";
+import Share from "@/Components/share/Share";
+import Stories from "@/Components/Stories/Story";
 const Content = () => {
-    return ( <
+    return ( 
+        <>
+        {/* <Stories/> */}
+        <
         div className = "feed" >
+        <Share/>
+        
         <
         div className = "post" > { " " } <
         div className = "post-header" > { " " } <
@@ -125,6 +132,8 @@ const Content = () => {
         div > { " " } <
         /div>{" "} < /
         div >
+        </>
+
     );
 };
 

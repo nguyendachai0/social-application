@@ -37,7 +37,6 @@ import Dropdown from '@/Components/Dropdown';
           
         }
         const messageCreated = (message) => {
-            console.log('message', message)
             setLocalConversations((oldUsers) => {
                 return oldUsers.map((u) => {
                     if(
@@ -176,10 +175,8 @@ import Dropdown from '@/Components/Dropdown';
             })
             .listen('UserConnected', (event) => {
                 const channel = event.channelName;
-                console.log('channel', subscribedChannels.current);
                 if (!subscribedChannels.current.has(channel)) {
                     subscribedChannels.current.add(channel);
-                    console.log('channel', subscribedChannels.current);
     
                     Echo.private(channel)
                         .error((error) => {
@@ -215,7 +212,6 @@ import Dropdown from '@/Components/Dropdown';
             })
             .listen("FriendRequestSent", (event) => {
                 const senderId = event.senderId;
-                console.log(`New friend request from user ID: ${senderId}`);
                 emit("friendRequestReceived", { senderId });
             });
     

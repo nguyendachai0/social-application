@@ -35,6 +35,7 @@ const ChatLayout = ({ conversation, newMessage = null, onClose = () => {}, onHid
         try {
           const response = await fetch(`/${type}/${conversation.id}`);
           const data = await response.json();
+          console.log('data', data);
           if (data.selectedConversation) {
             setSelectedConversation(data.selectedConversation);
           } else {
@@ -51,13 +52,10 @@ const ChatLayout = ({ conversation, newMessage = null, onClose = () => {}, onHid
 
 
   const messageCreated = (message) => {
-    console.log("message in Chat", message);
-    console.log(selectedConversation);
     if(selectedConversation && selectedConversation.is_group && selectedConversation.id  === message.group_id){
         setLocalMessages((prevMessages) =>
         {
           const updatedMessages = [...prevMessages, message];
-          console.log(updatedMessages)
           return updatedMessages;
         });
     }
