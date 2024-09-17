@@ -1,33 +1,35 @@
-import Navbar from "@/Components/app/navBar/NavBar"
-import LeftBar from "@/Components/app/leftBar/LeftBar";
-import RightBar from "@/Components/app/rightBar/RightBar";
+import { useEffect, useState } from "react";
+import { usePage } from "@inertiajs/react";
 import Content from "@/Components/app/content/Content";
+import Layout from "@/Layouts/Layout"; // Import the Layout component
 
+const Home = ({ auth }) => {
+    const [posts, setPosts] = useState([]);
+    const page = usePage();
 
+    useEffect(() => {
+        const fetchPosts = async () => {
+            try {
+                const response = await fetch('/posts');
+                const data = await response.json();
+                console.log(data);
+                setPosts(data);
+            } catch (error) {
+                console.error("Error fetching posts:", error);
+            }
+        };
 
-const Home = () => {
+        fetchPosts();
+    }, []);
 
     return (
-        <div>
-            <Content /> 
-        </div>
+        <Content user={auth?.user} posts={posts} />
     );
 };
-Home.layout = (page) => {
-    return  (
-<>  
 
-            <Navbar />
-            <div style={{ display: "flex" }}>
-            {page.type.name !== "ProfilePage" &&   <LeftBar user={page.props.auth?.user} /> }
-                <div style={{ flex: 6 }}>
-                    {page}
-                </div>
-                {page.type.name !== "ProfilePage" && <RightBar />}
-            </div>
-        </>
+// Use Layout as a layout for this page
+Home.layout = (page) => (
+    <Layout>{page}</Layout>
+);
 
-    );
-}
-    
 export default Home;

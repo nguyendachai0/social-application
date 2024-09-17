@@ -5,7 +5,6 @@ const UserAvatar = ({ user, online = null, profile = false }) => {
     if (!user) {
         return <div>No user data</div>; // Placeholder or default UI
       }
-      console.log(user)
     return (
         <>
 

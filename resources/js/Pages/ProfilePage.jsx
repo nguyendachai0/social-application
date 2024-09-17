@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { PhotoIcon, CameraIcon } from '@heroicons/react/24/outline';
 import { usePage } from '@inertiajs/react';
-
-const ProfilePage = ({ profile: initialProfile, countFriends: initialCountFriends, friendRequest: initialFriendRequest }) => {
+import Post from '@/Components/post/Post';
+import Layout from '@/Layouts/Layout';
+import RightBarProfile from '@/Components/app/rightbarProfile/RightBarProfile';
+const ProfilePage = ({ profile: initialProfile, countFriends: initialCountFriends, friendRequest: initialFriendRequest, posts: initialPosts }) => {
   const [profile, setProfile] = useState(initialProfile);
   const [countFriends, setCountFriends] = useState(initialCountFriends);
   const [friendRequest, setFriendRequest] = useState(initialFriendRequest);
+  const [posts, setPosts] = useState(initialPosts);
   const [avatar, setAvatar] = useState(null);
   const [banner, setBanner] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -13,7 +16,7 @@ const ProfilePage = ({ profile: initialProfile, countFriends: initialCountFriend
   const page = usePage();
   const authUser = page.props.auth.user;
   const isOwnProfile = authUser.id === profile.id;
-
+  console.log('p',posts);
   const handleFileChange = (event, type) => {
     if (type === 'avatar') {
       setAvatar(event.target.files[0]);
@@ -139,6 +142,7 @@ const ProfilePage = ({ profile: initialProfile, countFriends: initialCountFriend
   
 
   return (
+    <>
     <div className="bg-gray-100 min-h-screen flex justify-center">
       <div className="w-full max-w-6xl px-4">
         {/* Cover Photo */}
@@ -171,7 +175,7 @@ const ProfilePage = ({ profile: initialProfile, countFriends: initialCountFriend
           )}
 
           {/* Profile Picture */}
-          <div className="absolute bottom-0 left-5 transform translate-y-1/2">
+          <div className="absolute bottom-0 left-1/2 transform translate-y-1/2  -translate-x-1/2">
             <img
               src={profile.avatar ? `/storage/avatars/${profile.avatar}` : "https://via.placeholder.com/150"}
               alt="Profile"
@@ -220,23 +224,46 @@ const ProfilePage = ({ profile: initialProfile, countFriends: initialCountFriend
                   className="bg-blue-500 text-white px-4 py-2 rounded-lg mr-4"
                 >
                   Message
-                </button>
-
-
-
-
-
-    
-
-
-           
+                </button>       
               </div>
             )}
           </div>
         </div>
-      </div>
+        <div className="feed">
+                {posts.length > 0 ? (
+                    posts.map((post) => (
+                        <Post key={post.id} post={post}/>
+                    ))
+                ) : (
+                    <p>No posts available</p>
+                )}
+        </div>
+        <RightBarProfile/><div className="flex">
+  <div className="flex-1 p-4">
+    <div className="feed">
+      {posts.length > 0 ? (
+        posts.map((post) => (
+          <Post key={post.id} post={post} />
+        ))
+      ) : (
+        <p>No posts available</p>
+      )}
     </div>
+  </div>
+  <div className="w-1/3 p-4">
+    <RightBarProfile profile={profile} />
+  </div>
+</div>
+      </div>
+     
+
+    </div>
+
+    </>
+
   );
 };
-
+ProfilePage.layout = (page) => (
+  <Layout showRightBar={false}>{page}</Layout>
+);
 export default ProfilePage;

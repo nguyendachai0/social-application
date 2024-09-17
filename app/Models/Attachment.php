@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\URL;
 
 class Attachment extends Model
 {
@@ -16,4 +17,8 @@ class Attachment extends Model
         'mime',
         'size'
     ];
+    public function getPathAttribute()
+    {
+        return URL::to('storage/' . $this->attributes['path']);
+    }
 }

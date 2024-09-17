@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\FriendRequest;
 use App\Models\User;
+use App\Repositories\FriendRequests\FriendRequestRepositoryInterface;
+use App\Services\Posts\PostServiceInterface;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
@@ -11,24 +12,28 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
+    protected $friendRequestRepository;
+    protected $postService;
+
+    public function __construct(FriendRequestRepositoryInterface $friendRequestRepository, PostServiceInterface $postService)
+    {
+        $this->friendRequestRepository = $friendRequestRepository;
+        $this->postService = $postService;
+    }
+
     public function profile($email)
     {
         $user = User::where('email', $email)->firstOrFail();
         $senderId = auth()->id();
         $recipientId = $user->id;
         $countFriends = count($user->friends);
-        $friendRequest = FriendRequest::where(function ($query) use ($senderId, $recipientId) {
-            $query->where('sender_id', $senderId)
-                ->where('receiver_id', $recipientId);
-        })->orWhere(function ($query) use ($senderId, $recipientId) {
-            $query->where('sender_id', $recipientId)
-                ->where('receiver_id', $senderId);
-        })->first();
-
+        $friendRequest = $this->friendRequestRepository->findBySenderOrReceiverIds($senderId, $recipientId);
+        $posts = $this->postService->getUserPosts($user->id);
         return Inertia::render('ProfilePage', [
             'profile' => $user,
             'countFriends' => $countFriends,
             'friendRequest' => $friendRequest,
+            'posts' => $posts
         ]);
     }
 

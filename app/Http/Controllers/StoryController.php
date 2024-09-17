@@ -2,21 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Stories\StoryServiceInterface;
 use Illuminate\Http\Request;
-use App\Services\Posts\PostServiceInterface;
-use Illuminate\Support\Facades\Log;
 
-class PostController extends Controller
+class StoryController extends Controller
 {
-    protected $postService;
-    public function __construct(PostServiceInterface $postService)
+    protected $storyService;
+    public function __construct(StoryServiceInterface $storyService)
     {
-        $this->postService = $postService;
+        $this->storyService = $storyService;
     }
     public function index()
     {
         $user = auth()->user();
-        $posts = $this->postService->getPostsForUser($user->id);
+        $posts = $this->storyService->getUserStories($user->id);
         return response()->json($posts);
     }
 
@@ -26,16 +25,12 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'user_id' =>  'required|exists:users,id',
             'caption' =>  'string',
             'attachments.*' => 'file|mimes:jpg,png,pdf,docx|max:2048'
         ]);
-        $data = [
-            'user_id' => auth()->id(),
-            'caption' => $request->input('caption'),
-            'attachments' => $request->file('attachments'), // Multiple files
-        ];
-
-        $post = $this->postService->createPost($data);
+        $data = $request->all();
+        $post = $this->storyService->createStory($data);
         return response()->json($post, 201);
     }
 
@@ -44,7 +39,7 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
-        $post = $this->postService->getPostById($id);
+        $post = $this->storyService->getStoryById($id);
         return response()->json($post);
     }
 
@@ -59,7 +54,7 @@ class PostController extends Controller
             'attachements.*' => 'file|mimes:jpg,png,pdf,docx|max:2048'
         ]);
         $data = $request->all();
-        $post = $this->postService->updatePost($id, $data);
+        $post = $this->storyService->updateStory($id, $data);
         return response()->json($post);
     }
 
@@ -68,7 +63,7 @@ class PostController extends Controller
      */
     public function destroy(string $id)
     {
-        $this->postService->deletePost($id);
-        return response()->json(['message' => 'Post deleted successfully']);
+        $this->storyService->deleteStory($id);
+        return response()->json(['message' => 'Story deleted successfully']);
     }
 }
