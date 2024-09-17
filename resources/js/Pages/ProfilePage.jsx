@@ -204,7 +204,7 @@ const ProfilePage = ({ profile: initialProfile, countFriends: initialCountFriend
             )}
           </div>
         </div>
-
+            {/* Profile */}
         {/* Profile Info and Buttons */}
         <div className="mt-12 p-4">
           <div className="flex justify-between items-center">
